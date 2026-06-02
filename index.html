@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Космический Рывок — Space Dash</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://yandex.ru/games/sdk/v2"></script>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Загрузка -->
+        <div id="screen-loading" class="screen active">
+            <div class="loading-content">
+                <h1>🚀 КОСМИЧЕСКИЙ РЫВОК</h1>
+                <div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div>
+                <p id="loading-text">Загрузка ресурсов...</p>
+            </div>
+        </div>
+
+        <!-- Кат-сцена (Visual Novel) -->
+        <div id="screen-cutscene" class="screen">
+            <div class="cutscene-bg" id="cutscene-bg"></div>
+            <div class="cutscene-char left" id="char-left"></div>
+            <div class="cutscene-char right" id="char-right"></div>
+            <div class="cutscene-dialog-box">
+                <div class="dialog-speaker" id="dialog-speaker">Диспетчер</div>
+                <div class="dialog-text" id="dialog-text"></div>
+                <div class="dialog-next" id="dialog-next">▶</div>
+            </div>
+        </div>
+
+        <!-- Меню -->
+        <div id="screen-menu" class="screen">
+            <div class="menu-content">
+                <h1 class="menu-title">КОСМИЧЕСКИЙ<br>РЫВОК</h1>
+                <p class="menu-subtitle">Space Dash</p>
+                <div class="menu-coins" id="menu-coins">💎 0</div>
+                <div class="menu-buttons">
+                    <button class="btn-menu btn-start" id="btn-start">▶ СТАРТ</button>
+                    <button class="btn-menu" id="btn-upgrades">⚡ УЛУЧШЕНИЯ</button>
+                    <button class="btn-menu" id="btn-skins">🚀 СКИНЫ</button>
+                    <button class="btn-menu" id="btn-records">🏆 РЕКОРДЫ</button>
+                    <button class="btn-menu" id="btn-settings">⚙️ НАСТРОЙКИ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Улучшения -->
+        <div id="screen-upgrades" class="screen">
+            <div class="panel">
+                <div class="panel-header">
+                    <button class="btn-back" id="btn-back-upgrades">←</button>
+                    <h2>⚡ УЛУЧШЕНИЯ</h2>
+                    <span class="panel-coins" id="upgrades-coins">💎 0</span>
+                </div>
+                <div class="upgrades-list" id="upgrades-list"></div>
+                <button class="btn-menu btn-ad" id="btn-ad-upgrade">📺 +50💎 за рекламу (<span id="ad-left">2</span>/2)</button>
+            </div>
+        </div>
+
+        <!-- Скины -->
+        <div id="screen-skins" class="screen">
+            <div class="panel">
+                <div class="panel-header">
+                    <button class="btn-back" id="btn-back-skins">←</button>
+                    <h2>🚀 СКИНЫ</h2>
+                    <span class="panel-coins" id="skins-coins">💎 0</span>
+                </div>
+                <div class="skins-grid" id="skins-grid"></div>
+            </div>
+        </div>
+
+        <!-- Рекорды -->
+        <div id="screen-records" class="screen">
+            <div class="panel">
+                <div class="panel-header">
+                    <button class="btn-back" id="btn-back-records">←</button>
+                    <h2>🏆 РЕКОРДЫ</h2>
+                </div>
+                <div class="records-list" id="records-list"></div>
+            </div>
+        </div>
+
+        <!-- Настройки -->
+        <div id="screen-settings" class="screen">
+            <div class="panel">
+                <div class="panel-header">
+                    <button class="btn-back" id="btn-back-settings">←</button>
+                    <h2>⚙️ НАСТРОЙКИ</h2>
+                </div>
+                <div class="settings-list">
+                    <div class="setting-row">
+                        <span>Музыка</span>
+                        <button class="btn-toggle on" id="toggle-music">ВКЛ</button>
+                    </div>
+                    <div class="setting-row">
+                        <span>Звуки</span>
+                        <button class="btn-toggle on" id="toggle-sfx">ВКЛ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HUD -->
+        <div id="game-hud" class="hidden">
+            <div class="hud-top-bar">
+                <div class="hud-info">
+                    <span id="hud-distance">0 м</span>
+                    <span id="hud-location" class="hud-loc">Земля</span>
+                </div>
+                <div class="hud-right">
+                    <span id="hud-coins">💎 0</span>
+                    <button class="hud-btn" id="btn-pause">⏸</button>
+                </div>
+            </div>
+            <button class="shoot-btn" id="btn-shoot">🎯<span class="shoot-cost">10💎</span></button>
+            <div class="mobile-arrows" id="mobile-arrows">
+                <button class="arrow-btn" id="btn-left">◀</button>
+                <button class="arrow-btn" id="btn-right">▶</button>
+            </div>
+        </div>
+
+        <!-- Пауза -->
+        <div id="screen-pause" class="screen">
+            <div class="popup">
+                <h2>⏸ ПАУЗА</h2>
+                <button class="btn-menu" id="btn-resume">▶ ПРОДОЛЖИТЬ</button>
+                <button class="btn-menu" id="btn-quit">🏠 В МЕНЮ</button>
+            </div>
+        </div>
+
+        <!-- Смерть -->
+        <div id="screen-death" class="screen">
+            <div class="popup">
+                <h2>💥 КРУШЕНИЕ!</h2>
+                <p class="stat" id="death-stat-dist">Дистанция: 0 м</p>
+                <p class="stat" id="death-stat-coins">Кристаллы: 0</p>
+                <p class="stat" id="death-stat-record">Рекорд: 0 м</p>
+                <button class="btn-menu btn-ad" id="btn-revive-ad">📺 Возродиться (реклама)</button>
+                <button class="btn-menu" id="btn-revive-coins">💎 Возродиться (50💎)</button>
+                <button class="btn-menu btn-start" id="btn-restart">🔄 ЗАНОВО</button>
+                <button class="btn-menu" id="btn-death-menu">🏠 В МЕНЮ</button>
+            </div>
+        </div>
+
+        <!-- Победа -->
+        <div id="screen-victory" class="screen">
+            <div class="popup victory">
+                <h2>🎉 МИССИЯ ВЫПОЛНЕНА!</h2>
+                <p id="victory-text">Вы достигли цели!</p>
+                <p class="stat" id="victory-dist">Дистанция: 0 м</p>
+                <p class="stat" id="victory-coins">Собрано: 0 💎</p>
+                <button class="btn-menu btn-start" id="btn-next-chapter">▶ СЛЕДУЮЩАЯ ГЛАВА</button>
+                <button class="btn-menu" id="btn-victory-menu">🏠 В МЕНЮ</button>
+            </div>
+        </div>
+
+        <!-- Переход локации -->
+        <div id="location-transition" class="hidden">
+            <div class="transition-content">
+                <div class="transition-line"></div>
+                <div class="transition-name" id="transition-name">ОРБИТА</div>
+                <div class="transition-line"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
